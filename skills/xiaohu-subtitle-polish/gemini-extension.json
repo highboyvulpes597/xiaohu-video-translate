@@ -1,0 +1,6 @@
+{
+  "name": "xiaohu-subtitle-polish",
+  "version": "1.0.0",
+  "description": "字幕翻译与润色工具：将 ASR 转写或外语字幕翻译润色为高质量简体中文字幕，修正识别错误、优化断句、严格对齐时间戳、生成中英双语 ASS。",
+  "contextFileName": "SKILL.md"
+}

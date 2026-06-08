@@ -1,4 +1,4 @@
-# claude-video-translate
+# xiaohu-video-translate
 
 > 一句话把外语视频变成**带中文字幕的视频 + 中文文稿**。下载、转写、翻译、润色、烧录，一条龙跑完，全程本地，转写不花一分钱 API 费。
 > One sentence turns a foreign-language video into a **Chinese-subtitled video + a clean transcript**. Download → transcribe → translate → polish → burn-in, end to end, all local, zero transcription API cost.
@@ -76,7 +76,7 @@
 
 ```bash
 # 1. 基础工具（没装 Homebrew 先去 brew.sh 装）
-brew install yt-dlp ffmpeg whisper-cpp
+brew install yt-dlp ffmpeg
 
 # 2. 转写引擎（Apple Silicon 选 mlx-whisper，走 GPU 加速最快）
 pip3 install --break-system-packages mlx-whisper
@@ -84,12 +84,14 @@ pip3 install --break-system-packages mlx-whisper
 # pip3 install --break-system-packages faster-whisper
 
 # 3. 装技能
-git clone https://github.com/xiaohuailabs/claude-video-translate.git
-cd claude-video-translate
+git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+cd xiaohu-video-translate
 bash install.sh
 ```
 
-然后在 `~/.claude/skills/xiaohu-video-md/config.json` 把 `output_dir` 改成你的绝对路径。MLX 模型首次运行会自动从 HuggingFace 下载（约 1.5GB）。
+然后在 `~/.claude/skills/xiaohu-video-md/config.json` 把 `output_dir` 改成你的绝对路径。MLX 模型首次运行会自动从 HuggingFace 下载（约 1.5GB），**不用手动下载**。
+
+> `whisper-cpp` 是个**可选的备份转写引擎**，默认走 mlx-whisper / faster-whisper 就不用装它。只有想用 whisper-cli（纯转文字最快）时才 `brew install whisper-cpp`，并把 ggml 模型下到 `~/.cache/whisper-cpp/`（命令见各技能的 `初始化.md`）。
 
 #### 二、Windows
 
@@ -100,8 +102,8 @@ bash install.sh
 ```bash
 sudo apt update && sudo apt install -y ffmpeg
 pip3 install yt-dlp faster-whisper        # Windows 没有 Apple GPU，用 faster-whisper
-git clone https://github.com/xiaohuailabs/claude-video-translate.git
-cd claude-video-translate && bash install.sh
+git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+cd xiaohu-video-translate && bash install.sh
 ```
 
 **原生 Windows（不用 WSL）要注意三点：**
@@ -200,10 +202,10 @@ The core is scripts + a `SKILL.md` per skill — **any agent that can read a ski
 **macOS (best, especially Apple Silicon):**
 
 ```bash
-brew install yt-dlp ffmpeg whisper-cpp
+brew install yt-dlp ffmpeg
 pip3 install --break-system-packages mlx-whisper   # or faster-whisper on non-Apple-Silicon
-git clone https://github.com/xiaohuailabs/claude-video-translate.git
-cd claude-video-translate && bash install.sh
+git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+cd xiaohu-video-translate && bash install.sh
 ```
 
 **Windows** — this project is tuned for Mac. Easiest path is **WSL2 + Ubuntu**, then it behaves like Linux. For native Windows, three differences:
@@ -214,7 +216,9 @@ cd claude-video-translate && bash install.sh
 
 **Linux** — same as WSL: `apt install ffmpeg` + `pip install yt-dlp faster-whisper`, and use a CJK font (e.g. Noto Sans CJK) for burn-in.
 
-Then set `output_dir` (absolute path) in `~/.claude/skills/xiaohu-video-md/config.json`. The MLX model auto-downloads on first run.
+Then set `output_dir` (absolute path) in `~/.claude/skills/xiaohu-video-md/config.json`. The MLX model auto-downloads on first run — no manual download needed.
+
+> `whisper-cpp` is an **optional fallback engine**; the default mlx-whisper / faster-whisper path doesn't need it. Only `brew install whisper-cpp` (and download the ggml models to `~/.cache/whisper-cpp/`) if you specifically want whisper-cli for fastest text-only transcription.
 
 ### Usage
 

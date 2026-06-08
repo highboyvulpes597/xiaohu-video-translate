@@ -45,9 +45,11 @@ echo "OUTPUT_ROOT=$OUTPUT_ROOT"
 - **输出根目录**：要求显式配置；临时目录 `<输出根>/tmp/`（下文用 `<输出根>` 指定的根路径）
 - **配置方式**：在本技能目录下 `config.json` 设置 `output_dir=<绝对路径>`，或命令行 `--outdir <绝对路径>`（命令行优先）。`output_dir` 为空/缺失/相对路径时，脚本会强制提示用户输入绝对路径并写回 `config.json`，不允许默认回落技能目录。
 
-**Whisper 模型路径**：
-- 精确模式：`$HOME/.local/share/whisper/ggml-large-v3-turbo.bin`  （默认模型）
-- 快速模式：`$HOME/.local/share/whisper/ggml-medium.bin`  （用户没有要求不允许使用此模型）
+**转写引擎**（默认走脚本 `scripts/transcribe_srt.py`，自动下模型、零配置）：
+- **默认：MLX Whisper / faster-whisper**——首次运行自动下载模型，是烧字幕场景的首选（whisper-cli 没有词级时间戳，字幕会不同步，不要用于烧字幕）。
+- **可选备份：whisper-cli**（whisper-cpp）——仅纯转文字、或脚本不可用时才用，需自行 `brew install whisper-cpp` 并把模型下到 `~/.cache/whisper-cpp/`：
+  - 精确模式：`~/.cache/whisper-cpp/ggml-large-v3-turbo.bin`（默认模型）
+  - 快速模式：`~/.cache/whisper-cpp/ggml-medium.bin`（用户没有要求不允许使用此模型）
 
 **转写模式选择逻辑**：
 - **精确模式**（默认）：`ggml-large-v3-turbo.bin`，95% 精度
@@ -184,8 +186,8 @@ yt-dlp -f "bestvideo[vcodec^=avc1][ext=mp4]+bestaudio[ext=m4a]/bestvideo[ext=mp4
 
 **步骤2B（无字幕）**：
 1) 提取音频（WAV 格式，16kHz 单声道，Whisper 最佳输入）：`ffmpeg -y -i "/path/to/video.mp4" -vn -acodec pcm_s16le -ar 16000 -ac 1 <输出根>/tmp/audio.wav`
-2) Whisper 转写：按精确/快速模式选择模型，`whisper-cli -m <模型绝对路径> -t 8 -l <语言> <输出根>/tmp/audio.wav --output-srt --output-file <输出根>/tmp/audio`
-   - 注意：模型路径必须用绝对路径（`/Users/apple/.local/share/whisper/...`），不能用 `$HOME` 或 `~`
+2) Whisper 转写（默认走脚本，自动下模型；烧字幕必须用脚本拿词级时间戳，不能用 whisper-cli）：`python3 scripts/transcribe_srt.py "<输出根>/tmp/audio.wav" --output "<输出根>/tmp/audio.srt" --language <语言>`
+   - 可选备份引擎 whisper-cli 仅用于纯转文字，命令与模型路径见上方「转写引擎」
 3) 若转写结果非中文，按 `xiaohu-subtitle-polish` 技能的润色规则翻译为 `<输出根>/tmp/audio_zh.srt`，中文则直接使用。
    - 润色要求：去标点、英文中文间加空格、专有名词保留原文、歌词用 ♪ 包裹、去末尾重复/幻觉
 
@@ -283,8 +285,9 @@ rm -f "<输出根>/tmp/audio.mp3" "<输出根>/tmp/audio"*.srt "<输出根>/tmp/
 ## 依赖
 
 **所需依赖**：
-- 工具：`yt-dlp`、`ffmpeg`、`whisper-cpp`
-- 模型：`ggml-large-v3-turbo.bin`、`ggml-medium.bin`
+- 工具：`yt-dlp`、`ffmpeg`；`whisper-cpp`（可选备份转写引擎，不装也能用）
+- Python 包：`mlx-whisper`（Apple 芯片首选）或 `faster-whisper`（通用首选）
+- 模型：脚本引擎首次运行自动从 HuggingFace 下载；whisper-cpp 备份引擎需自行把 `ggml-large-v3-turbo.bin`、`ggml-medium.bin` 下到 `~/.cache/whisper-cpp/`
 
 **首次使用或依赖缺失时**：
 AI 应自动检测依赖，如发现缺失，**读取 `初始化.md` 文档并按指引自动安装**。

@@ -80,9 +80,11 @@ echo "OUTPUT_ROOT=$OUTPUT_ROOT"
 - **脚本目录**：`scripts/`
 - **输出根需显式配置**：在本技能目录下 `config.json` 设置 `output_dir=<绝对路径>`，或调用时用 `--outdir <绝对路径>`（命令行优先）。必须是绝对路径；`output_dir` 为空/缺失/相对路径时，脚本会强制提示用户输入绝对路径并写回 `config.json`，不会默认回落技能目录。根目录下自动创建/使用 `tmp/`（中间产物）和 `data/`（最终产物）。
 
-**模型路径**：
-- 精确模式：`~/.local/share/whisper/ggml-large-v3-turbo.bin`（默认模型）
-- 快速模式：`~/.local/share/whisper/ggml-medium.bin`（用户没有要求不允许使用此模型）
+**转写引擎**（默认走脚本，零配置开箱即用）：
+- **默认：MLX Whisper / faster-whisper**（`scripts/transcribe_srt.py`）——首次运行自动从 HuggingFace 下载模型，无需手动准备。所有场景一律首选脚本。
+- **可选备份：whisper-cli**（whisper-cpp）——仅当用户明确指定、或上面两个都装不了时才用。需自行 `brew install whisper-cpp` 并把 ggml 模型下到 `~/.cache/whisper-cpp/`（见 `初始化.md`）：
+  - 精确模式：`~/.cache/whisper-cpp/ggml-large-v3-turbo.bin`（默认模型）
+  - 快速模式：`~/.cache/whisper-cpp/ggml-medium.bin`（用户没有要求不允许使用此模型）
 
 ## 输出路径选择逻辑
 - 步骤0：先解析输出根（命令行 `--outdir` → `config.json`），`output_dir` 缺失/无效时立即提示用户输入绝对路径并写回 `config.json`，未配置不可继续。
@@ -115,16 +117,15 @@ python3 scripts/transcribe_srt.py "<输入文件>" --output "<输出文件>.srt"
 
 ### 只出文档场景（不需要精确时间戳）
 
-使用 **whisper-cli**，速度最快：
+默认同样走脚本（自动下模型、零配置），转写后从 SRT 取纯文本（去掉序号和时间戳行）即可：
 ```bash
-whisper-cli -m ~/.local/share/whisper/ggml-large-v3-turbo.bin -t 8 \
-  <输入文件> -otxt
+python3 scripts/transcribe_srt.py "<输入文件>" --output "<输出文件>.srt"
 ```
-快速模式（用户说"快速"/"快"）：
-```bash
-whisper-cli -m ~/.local/share/whisper/ggml-medium.bin -t 8 \
-  <输入文件> -otxt
-```
+> 可选备份：若已装 whisper-cpp 且想要最快的纯文本输出，可用 whisper-cli（需自备 ggml 模型，见上方「转写引擎」）：
+> ```bash
+> whisper-cli -m ~/.cache/whisper-cpp/ggml-large-v3-turbo.bin -t 8 <输入文件> -otxt
+> # 快速模式（用户说"快速"/"快"）：把模型换成 ggml-medium.bin
+> ```
 
 ### 长视频特殊处理（>10分钟）
 
@@ -197,23 +198,17 @@ yt-dlp -x --audio-format mp3 --embed-thumbnail --add-metadata \
 python3 scripts/youtube_audio_download.py "<视频URL>"
 ```
 
-2) Whisper CLI 转写（使用 whisper-cpp，详见上方"Whisper 转写命令模板"）：
+2) Whisper 转写（默认走脚本，自动下模型；不指定语言让其自动检测中/英/日等）：
 ```bash
-# 根据模式选择模型，输出为文本格式
-# <audio>.mp3 为 yt-dlp 实际输出的音频文件名（截断后的标题，去特殊符号）
-# 不指定 -l 参数，让 Whisper 自动检测语言（可识别中文、英文、日文等）
-
-# 精确模式（默认）
-whisper-cli -m ~/.local/share/whisper/ggml-large-v3-turbo.bin -t 8 \
-  "<输出根>/tmp/<audio>.mp3" -otxt   # 直接生成 <audio>.mp3.txt
-
-# 快速模式（用户没有要求不允许使用此模型）
-# whisper-cli -m ~/.local/share/whisper/ggml-medium.bin -t 8 \
-#   "<输出根>/tmp/<audio>.mp3" -otxt   # 直接生成 <audio>.mp3.txt
+python3 scripts/transcribe_srt.py "<输出根>/tmp/<audio>.mp3" --output "<输出根>/tmp/<audio>.srt"
 ```
+> 可选备份：已装 whisper-cpp 时可用 whisper-cli 直接出 txt（需自备 ggml 模型，见上方「转写引擎」）：
+> ```bash
+> whisper-cli -m ~/.cache/whisper-cpp/ggml-large-v3-turbo.bin -t 8 "<输出根>/tmp/<audio>.mp3" -otxt
+> ```
 
 3) AI 读取转写文本并生成 Markdown：
-- 读取 `<输出根>/tmp/<audio>.mp3.txt` 全部内容，按“通用 Markdown 生成规则”产出（`<audio>` 即视频ID）。
+- 读取 `<输出根>/tmp/<audio>.srt`（默认脚本路线）或 `<audio>.mp3.txt`（whisper-cli 路线），去掉序号和时间戳行得到纯文本，按“通用 Markdown 生成规则”产出（`<audio>` 即视频ID）。
 
 ### 抖音视频处理
 
@@ -238,15 +233,14 @@ python3 scripts/douyin_download.py <抖音视频URL> --audio
 ffmpeg -i "<输出根>/tmp/<视频标题>-音频.m4a" -acodec libmp3lame -q:a 2 "<输出根>/tmp/<视频标题>-音频.mp3"
 ```
 
-3) Whisper 转写（默认中文）：
+3) Whisper 转写（默认走脚本，自动下模型）：
 ```bash
-whisper-cli -m ~/.local/share/whisper/ggml-large-v3-turbo.bin -t 8 \
-  "<输出根>/tmp/<视频标题>-音频.mp3" -l zh -otxt   # 直接生成 <视频标题>-音频.mp3.txt
+python3 scripts/transcribe_srt.py "<输出根>/tmp/<视频标题>-音频.mp3" --output "<输出根>/tmp/<视频标题>-音频.srt" --language zh
 ```
-（其他语言可改 `-l en/ja/...`）
+（其他语言可改 `--language en/ja/...`；可选备份引擎 whisper-cli 见上方「转写引擎」）
 
 4) 生成 Markdown：
-   - 读取 `<输出根>/tmp/<视频标题>-音频.mp3.txt`，按“通用 Markdown 生成规则”产出（默认中文）。
+   - 读取 `<输出根>/tmp/<视频标题>-音频.srt`，去掉序号和时间戳行得到纯文本，按“通用 Markdown 生成规则”产出（默认中文）。
 
 **错误处理**：
 - **步骤1失败（下载音频）**：
@@ -439,10 +433,10 @@ drawtext=text='<水印文字>':fontfile=${FONT}:fontsize=44:fontcolor=white:alph
 ## 依赖
 
 **所需依赖**：
-- 工具：`yt-dlp`、`whisper-cpp`（兜底）、`ffmpeg`
-- Python 包：`faster-whisper`（SRT 转写首选）、`patchright`（抖音视频处理必需）
+- 工具：`yt-dlp`、`ffmpeg`；`whisper-cpp`（可选备份转写引擎，不装也能用）
+- Python 包：`mlx-whisper`（Apple 芯片首选）或 `faster-whisper`（通用首选）、`patchright`（抖音视频处理必需）
 - 脚本：`scripts/transcribe_srt.py`、`scripts/vtt_to_text.sh`、`scripts/douyin_login.py`、`scripts/douyin_download.py`
-- 模型：faster-whisper 自动从 HuggingFace 下载；whisper-cpp 兜底用 `ggml-large-v3-turbo.bin`、`ggml-medium.bin`
+- 模型：mlx-whisper / faster-whisper 首次运行自动从 HuggingFace 下载，无需手动准备；whisper-cpp 备份引擎需自行把 `ggml-large-v3-turbo.bin`、`ggml-medium.bin` 下到 `~/.cache/whisper-cpp/`
 
 **依赖检查原则**：
 - 直接执行主流程，遇错再查 `初始化.md` / `抖音初始化.md` 补依赖，默认假设环境已装好

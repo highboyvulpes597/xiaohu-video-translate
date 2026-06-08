@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# claude-video-translate 一键安装脚本
+# xiaohu-video-translate 一键安装脚本
 # 把三个技能复制到 ~/.claude/skills/，并从模板生成 config.json
 #
 # 用法：
@@ -34,7 +34,7 @@ done
 echo ""
 echo "==> 检查命令行依赖"
 missing=()
-for bin in yt-dlp ffmpeg whisper-cli; do
+for bin in yt-dlp ffmpeg; do
   if command -v "$bin" >/dev/null 2>&1; then
     echo "    [OK] $bin"
   else
@@ -43,10 +43,20 @@ for bin in yt-dlp ffmpeg whisper-cli; do
   fi
 done
 
+# whisper-cli 是可选备份转写引擎，缺了不影响默认流程（默认走 mlx/faster，模型自动下载）
+if command -v whisper-cli >/dev/null 2>&1; then
+  echo "    [OK] whisper-cli（可选备份引擎）"
+else
+  echo "    [--] whisper-cli 未装（可选备份引擎，默认走 mlx/faster，不需要它）"
+fi
+
 if [ "${#missing[@]}" -gt 0 ]; then
   echo ""
-  echo "缺少依赖，可用 Homebrew 安装："
-  echo "    brew install yt-dlp ffmpeg whisper-cpp"
+  case "$(uname -s)" in
+    Darwin) echo "缺少依赖，用 Homebrew 安装：    brew install ${missing[*]}" ;;
+    Linux)  echo "缺少依赖（示例）：              sudo apt install ffmpeg && pip3 install yt-dlp" ;;
+    *)      echo "缺少依赖：${missing[*]}（Windows 建议用 WSL，或用 winget / pip 安装）" ;;
+  esac
 fi
 
 echo ""
