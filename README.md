@@ -55,9 +55,13 @@
 
 ### 演示案例
 
-<!-- DEMO_PLACEHOLDER：此处将放入真实案例的「翻译前 / 后」对比帧、生成的中文 SRT 片段、以及输出视频截图。 -->
+同一段 a16z 英文访谈，翻成中 / 日 / 韩 / 阿 / 法 5 种语言的双语字幕——各语种译文在上、英文原文在下，从右往左书写的阿拉伯语也排得整整齐齐：
 
-*（演示案例即将补充）*
+![多语言双语字幕对比](assets/demo-multilang.jpg)
+
+烧进画面后的中英双语字幕（中文大、英文小，贴底不挡人）：
+
+![中英双语字幕实拍](assets/demo-bilingual.jpg)
 
 ### 支持哪些 AI 编程工具
 
@@ -187,6 +191,16 @@ Not English-only. **English, Japanese, Korean, French, Spanish… anything Whisp
 | **xiaohu-video-md** | Orchestrator: download / audio / Whisper / call the polisher / burn-in / Markdown |
 | **xiaohu-subtitle-polish** | Subtitle translation & polishing: fixes, translation, line-breaking, timestamp alignment, bilingual ASS |
 | **xiaohu-video-download** | Pure downloader: video / audio / playlists / burn subs onto a local file |
+
+### Demo
+
+One a16z English talk, subtitled into 5 languages — Chinese / Japanese / Korean / Arabic / French — each translation on top, the English original below. Even right-to-left Arabic lines up cleanly:
+
+![Multi-language bilingual subtitles](assets/demo-multilang.jpg)
+
+Burned into the frame (Chinese large, English small, pinned to the bottom):
+
+![Bilingual subtitles in a real video](assets/demo-bilingual.jpg)
 
 ### Which AI coding tools
 
